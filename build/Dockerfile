@@ -71,6 +71,7 @@ RUN		mkdir -p dev/seahub_thirdpart && \
 		mv ../../requirements.txt . && \
 		echo "flup" | tee -a requirements.txt && \
 		pip install --user -r requirements.txt && \
+                pip install --user jsonfield==2.1.1 django-appconf==1.0.2 && \
 		mv ~/.local/* .
 
 # For whatever reason, the ac_init call of seafile, ccnet, etc. happens which "6.0.1" (1.2.2 for libsearpc),
@@ -166,5 +167,4 @@ RUN         	busybox tar -xzf /usr/src/seafile-server_*.tar.gz -C /usr/src/ && \
 
 # Include this volume in containers/seafile/build/<tarballdir> so it becomes available to the host.
 VOLUME      	/haiwen
-
 CMD         	["cp", "-r", "/usr/src/seafile-server", "haiwen/"]

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Wait for mysql to start up...
+
 sleep 20
 
 if [[ -d "seafile-server-latest" ]]; then
@@ -54,7 +55,7 @@ fi
 
 cd seafile-server-latest
 
-su -m seafile -c "./seafile.sh start"
-su -m seafile -c "./seahub.sh start"
-
+chown -R root /data
+bash seafile.sh start
+bash seahub.sh start
 exec "$@"

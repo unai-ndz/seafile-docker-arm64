@@ -12,8 +12,9 @@ RUN         mkdir data haiwen && \
                         procps \
                         ffmpeg && \
 		        apt-get install -y --no-install-recommends \
-			             $BUILD_DEPS && \
-                pip install MySQL-python && \
+			             $BUILD_DEPS
+
+RUN             pip install mysqlclient && \
 		        apt-get purge --autoremove -y $BUILD_DEPS && \
                 groupadd seafile && useradd -g seafile seafile && \
                 rm -rf /var/lib/apt/lists/* && \
