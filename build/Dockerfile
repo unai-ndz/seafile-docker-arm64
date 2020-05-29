@@ -1,4 +1,4 @@
-FROM 		arm64v8/buildpack-deps:stretch
+FROM 		arm64v8/python:3-slim-stretch
 
 ARG		GITHUB=https://www.github.com/
 ARG		REPO=haiwen
@@ -19,7 +19,7 @@ ARG		PKG_CONFIG_PATH=${PREFIX_PATH}/dev/libsearpc:$PKG_CONFIG_PATH
 ARG		PKG_CONFIG_PATH=${PREFIX_PATH}/dev/ccnet-server:$PKG_CONFIG_PATH
 
 # Tags & Versions
-ARG		LIBSEARPC_VERSION=3.0
+ARG		LIBSEARPC_VERSION=3.2
 ARG		LIBSEARPC_TAG=v${LIBSEARPC_VERSION}-latest
 ARG		SERVER_VERSION
 ARG		SERVER_TAG=v${SERVER_VERSION}-server
@@ -41,8 +41,8 @@ RUN 		apt-get update && apt-get -y install \
 			libfuse-dev \
 			re2c \
 			flex \
-			python-pip \
-			python-setuptools \
+			python3-pip \
+			python3-setuptools \
 			cmake \
 			# git \
 			libonig-dev \
@@ -54,6 +54,67 @@ RUN 		apt-get update && apt-get -y install \
 		apt-get clean && \
 		rm -rf /var/lib/apt/lists/* && \
 		find /var/cache/apt/ -type f -exec rm -v {} \;
+
+RUN             apt-get update && apt-get -y install git
+# copied from buildpack-deps
+
+RUN set -ex; \
+	apt-get update; \
+# make sure debconf doesn't try to prompt (e.g. tzdata on Ubuntu)
+	DEBIAN_FRONTEND=noninteractive \
+	apt-get install -y --no-install-recommends \
+		autoconf \
+		automake \
+		bzip2 \
+		dpkg-dev \
+		file \
+		g++ \
+		gcc \
+		imagemagick \
+		libbz2-dev \
+		libc6-dev \
+		libcurl4-openssl-dev \
+		libdb-dev \
+		libevent-dev \
+		libffi-dev \
+		libgdbm-dev \
+		libglib2.0-dev \
+		libgmp-dev \
+		libjpeg-dev \
+		libkrb5-dev \
+		liblzma-dev \
+		libmagickcore-dev \
+		libmagickwand-dev \
+		libmaxminddb-dev \
+		libncurses5-dev \
+		libncursesw5-dev \
+		libpng-dev \
+		libpq-dev \
+		libreadline-dev \
+		libsqlite3-dev \
+		libssl-dev \
+		libtool \
+		libwebp-dev \
+		libxml2-dev \
+		libxslt-dev \
+		libyaml-dev \
+		make \
+		patch \
+		unzip \
+		xz-utils \
+		zlib1g-dev \
+		\
+# https://lists.debian.org/debian-devel-announce/2016/09/msg00000.html
+		$( \
+# if we use just "apt-cache show" here, it returns zero because "Can't select versions from package 'libmysqlclient-dev' as it is purely virtual", hence the pipe to grep
+			if apt-cache show 'default-libmysqlclient-dev' 2>/dev/null | grep -q '^Version:'; then \
+				echo 'default-libmysqlclient-dev'; \
+			else \
+				echo 'libmysqlclient-dev'; \
+			fi \
+		) \
+	; \
+	rm -rf /var/lib/apt/lists/*
 
 # libevhtp
 RUN 		cd dev && \
@@ -70,8 +131,7 @@ RUN		mkdir -p dev/seahub_thirdpart && \
 		cd dev/seahub_thirdpart && \
 		mv ../../requirements.txt . && \
 		echo "flup" | tee -a requirements.txt && \
-		pip install --user -r requirements.txt && \
-                pip install --user jsonfield==2.1.1 django-appconf==1.0.2 && \
+		pip3 install --user -r requirements.txt && \
 		mv ~/.local/* .
 
 # For whatever reason, the ac_init call of seafile, ccnet, etc. happens which "6.0.1" (1.2.2 for libsearpc),
@@ -82,7 +142,7 @@ RUN		cd dev && \
  		git clone ${LIBSEARPC_URL} && \
 		cd libsearpc && \
 		git reset --hard ${LIBSEARPC_TAG} && \
-		sed -i "s/1.2.2/${LIBSEARPC_VERSION}/g" configure.ac && \
+		sed -i "s/3.1.0/${LIBSEARPC_VERSION}/g" configure.ac && \
 		./autogen.sh && \
 		./configure && \
 		make dist
@@ -114,7 +174,7 @@ RUN		cd dev && \
 		git clone ${SEAHUB_URL} && \
 		cd seahub && \
 		git reset --hard ${SERVER_TAG} && \
-		./tools/gen-tarball.py --version=${SERVER_VERSION} --branch=HEAD
+		python3 tools/gen-tarball.py --version=${SERVER_VERSION} --branch=HEAD
 
 # seaobj
 RUN		cd dev && \
@@ -135,6 +195,7 @@ RUN		cd dev && \
 # `sed -i` does this.
 RUN  		sed -i "s/--enable-ldap//g" dev/seafile-server/scripts/build/build-server.py && \
 			mkdir seafile-sources && \
+			ls dev/libsearpc && \
 			cp dev/libsearpc/libsearpc-${LIBSEARPC_VERSION}.tar.gz seafile-sources && \
 			cp dev/ccnet-server/ccnet-${SERVER_VERSION}.tar.gz seafile-sources && \
 			cp dev/seafile-server/seafile-${SERVER_VERSION}.tar.gz seafile-sources && \
@@ -143,11 +204,12 @@ RUN  		sed -i "s/--enable-ldap//g" dev/seafile-server/scripts/build/build-server
 			cp dev/seafdav/seafdav.tar.gz seafile-sources && \
 			mkdir seafile-server-pkgs && \
 			dev/seafile-server/scripts/build/build-server.py \
+				--mysql_config=/usr/bin/mysql_config \
 				--version=${SERVER_VERSION} \
 				--libsearpc_version=${LIBSEARPC_VERSION} \
 				--ccnet_version=${SERVER_VERSION} \
 				--seafile_version=${SERVER_VERSION} \
-				--thirdpartdir=${PREFIX_PATH}/dev/seahub_thirdpart/lib/python2.7/site-packages/ \
+				--thirdpartdir=${PREFIX_PATH}/dev/seahub_thirdpart/lib/python3.7/site-packages/ \
 				--srcdir=${PREFIX_PATH}/seafile-sources \
 				--outputdir=${PREFIX_PATH}/seafile-server-pkgs \
 				--yes

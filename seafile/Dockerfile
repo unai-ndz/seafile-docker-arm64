@@ -1,4 +1,4 @@
-FROM        arm64v8/python:2-slim-stretch
+FROM        arm64v8/python:3-slim-stretch
 
 ARG         BUILD_DEPS='build-essential libmariadbclient-dev'
 

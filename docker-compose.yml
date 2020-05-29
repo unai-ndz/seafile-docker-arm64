@@ -4,7 +4,7 @@ services:
         build:
             context: build
             args:
-              - "SERVER_VERSION=7.0.0"
+              - "SERVER_VERSION=7.1.3"
         image: jojo243/seafile-base
         container_name: seafile_base
         volumes:
@@ -24,13 +24,13 @@ services:
         environment:
             - "LC_ALL=C"
             # Adapt according to your needs -------->
-            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME below
+            - "SERVER_NAME=192.168.0.192" # May also be localhost or an IP Address, must match SERVER_NAME below
             - "PORT=8080" # must match PORT below
             - "MYSQL_ROOT_PASSWD=pleaseinsertareasonablepassword" # should be same as below
             - "MYSQL_USER_PASSWD=12345678" # not needed most of the time
             - "ADMIN_EMAIL=admin@example.org" # email of the admin account
             - "ADMIN_PASSWORD=changethissoon"
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
+            - "SSL=0" # SSL=1: Use SSl; SSL=0: Don't use SSL
             # <--------
     nginx:
         restart: always
@@ -50,9 +50,9 @@ services:
             #              inner = port where nginx listens internally
         environment:
             # Adapt according to your needs -------->
-            - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME above
+            - "SERVER_NAME=192.168.0.192" # May also be localhost or an IP Address, must match SERVER_NAME above
             - "PORT=8080" # Must be the same as the "inner" port above, and must match PORT above
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
+            - "SSL=0" # SSL=1: Use SSl; SSL=0: Don't use SSL
             # <--------
         depends_on:
             - seafile
