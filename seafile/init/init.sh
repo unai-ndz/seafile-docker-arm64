@@ -58,4 +58,7 @@ cd seafile-server-latest
 chown -R root /data
 bash seafile.sh start
 bash seahub.sh start
+# sometimes it fails the first time. This is the easiest way to fix it
+bash seahub.sh start
+bash seahub.sh start
 exec "$@"

@@ -12,7 +12,7 @@ services:
     seafile:
         build:
             context: seafile
-        restart: always
+        restart: "no" 
         image: jojo243/seafile
         container_name: seafile_seafile
         volumes:
@@ -30,10 +30,10 @@ services:
             - "MYSQL_USER_PASSWD=12345678" # not needed most of the time
             - "ADMIN_EMAIL=admin@example.org" # email of the admin account
             - "ADMIN_PASSWORD=changethissoon"
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
+            - "SSL=0" # SSL=1: Use SSl; SSL=0: Don't use SSL
             # <--------
     nginx:
-        restart: always
+        restart: "no" 
         image: arm64v8/nginx
         container_name: seafile_nginx
         volumes:
@@ -45,21 +45,21 @@ services:
         command: ["nginx", "-g", "daemon off;"]
         ports:
             # Adapt according to your needs
-            - 8080:8080
+            - 80:8080
             # outer:inner, outer = port where seafile can be accessed from outside, must match SERVER_NAME (above)
             #              inner = port where nginx listens internally
         environment:
             # Adapt according to your needs -------->
             - "SERVER_NAME=www.example.org" # May also be localhost or an IP Address, must match SERVER_NAME above
             - "PORT=8080" # Must be the same as the "inner" port above, and must match PORT above
-            - "SSL=1" # SSL=1: Use SSl; SSL=0: Don't use SSL
+            - "SSL=0" # SSL=1: Use SSl; SSL=0: Don't use SSL
             # <--------
         depends_on:
             - seafile
     mysql:
         build:
             context: mysql
-        restart: always
+        restart: "no" 
         image: jojo243/mysql
         container_name: seafile_mysql
         volumes:
