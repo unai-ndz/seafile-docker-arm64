@@ -6,7 +6,7 @@ services:
             args:
               - "SERVER_VERSION=7.0.5"
         image: jojo243/seafile-base
-        container_name: seafile_base
+        container_name: seafile-base
         volumes:
             - ./build/src:/haiwen
     seafile:
@@ -14,13 +14,13 @@ services:
             context: seafile
         restart: always
         image: jojo243/seafile
-        container_name: seafile_seafile
+        container_name: seafile-seafile
         volumes:
             - ./build/src/:/usr/src/
             - ./seafile/haiwen:/haiwen/
             - ./seafile/seafile/:/data/
         depends_on:
-            - mysql
+            - db
         environment:
             - "LC_ALL=C"
             # Adapt according to your needs -------->
@@ -35,7 +35,7 @@ services:
     nginx:
         restart: always
         image: arm64v8/nginx
-        container_name: seafile_nginx
+        container_name: seafile-nginx
         volumes:
             - ./nginx/init/:/init/
             - ./nginx/conf/:/opt/conf/
@@ -56,14 +56,11 @@ services:
             # <--------
         depends_on:
             - seafile
-    mysql:
-        build:
-            context: mysql
-        restart: always
-        image: jojo243/mysql
-        container_name: seafile_mysql
+    db:
+        image: mariadb:10.1
+        container_name: seafile-db
         volumes:
-            - ./mysql/data:/var/lib/mysql
+            - ./db/data:/var/lib/mysql
         environment:
             # Adapt according to your needs -------->
             - "MYSQL_ROOT_PASSWORD=pleaseinsertareasonablepassword" # should be same as above
